@@ -6,7 +6,7 @@ WIN_TARGET = gull.exe
 
 BMI_FLAGS := -mbmi -mbmi2 -DHNI
 
-win:	$(BIN)%
+win:
 	x86_64-w64-mingw32-c++ -O3 -g0 -std=c++11 -fno-rtti -static -fno-exceptions -msse3 gull.cpp -o bin/$(WIN_TARGET)
 	
 unix:
