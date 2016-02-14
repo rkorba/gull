@@ -7763,7 +7763,6 @@ void get_time_limit(char string[])
 {
 	const char * ptr;
 	int i, time, inc, wtime, btime, winc, binc, moves, pondering, movetime = 0, exp_moves = MovesTg - 1;
-	std::cout<<string<<std::endl;
 	Infinite = 1;
 	MoveTime = 0;
 	SearchMoves = 0;
