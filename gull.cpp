@@ -7763,7 +7763,7 @@ void get_time_limit(char string[])
 {
 	const char * ptr;
 	int i, time, inc, wtime, btime, winc, binc, moves, pondering, movetime = 0, exp_moves = MovesTg - 1;
-
+	std::cout<<string<<std::endl;
 	Infinite = 1;
 	MoveTime = 0;
 	SearchMoves = 0;
@@ -8356,14 +8356,22 @@ int main(int argc, char *argv[])
 	DWORD p;
 	int i, HT = 0;
 	SYSTEM_INFO sysinfo;
+	bool bench = false;
 
-	if (argc >= 2) if (!memcmp(argv[1], "child", 5))
+	if (argc >= 2)
+	{
+		if (!memcmp(argv[1], "child", 5))
 		{
 			child = 1;
 			parent = 0;
 			WinParId = atoi(argv[2]);
 			Id = atoi(argv[3]);
 		}
+		else if(!memcmp(argv[1], "bench", 5))
+		{
+			bench = true;
+		}
+	}
 
 	HardwarePopCnt = __builtin_cpu_supports("popcnt");
 
@@ -8511,6 +8519,16 @@ reset_jump:
 		match_los(New, Base, 4 * 1024, 128, i, 3.0, 3.0, 0.0, 0.0, MatchInfo, 1);
 	}
 #endif
+	
+	if(bench)
+	{
+		init_search(1);
+		const char* cmd = "go depth 18";
+		char c[strlen(cmd)+1];
+		strcpy(c, cmd);
+		get_time_limit(c);
+		return 0;
+	}
 
 	while (true) uci();
 	return 0;
