@@ -7,7 +7,7 @@ WIN_TARGET = $(BIN)gull.exe
 BMI_FLAGS := -mbmi -mbmi2 -DHNI
 
 win32:
-	i686-w64-mingw32-c++-posix -O3 -g0 -std=c++11 -fno-rtti -static -fno-exceptions -msse3 gull.cpp -o $(WIN_TARGET)
+	i686-w64-mingw32-c++-posix -O3 -g0 -std=c++11 -fno-rtti -static -fno-exceptions -DW32_BUILD -msse3 gull.cpp -o $(WIN_TARGET)
 	@strip $(WIN_TARGET)
 
 win64:

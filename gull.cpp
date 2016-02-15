@@ -1,22 +1,12 @@
-#define W32_BUILD
-#undef W32_BUILD
-
 const void* Console = 0;
 
+#include <xmmintrin.h>
 #include <cmath>
 #include <cstring>
 #include <cpuid.h>
 #include <stdio.h>
 
 #define forceinline inline __attribute__((always_inline))
-
-#ifdef W32_BUILD
-#define NTDDI_VERSION 0x05010200
-#define _WIN32_WINNT 0x0501
-#endif
-
-#ifndef W32_BUILD
-#endif
 
 #define CPU_TIMING
 #undef CPU_TIMING
@@ -2424,8 +2414,6 @@ loop:
 }
 #endif
 
-#ifndef W32_BUILD
-
 forceinline int lsb(uint64_t x)
 {
 	return __builtin_ctzll(x);
@@ -2436,6 +2424,15 @@ forceinline int msb(uint64_t x)
 	return 8*sizeof(uint64_t)-1-__builtin_clzll(x);
 }
 
+forceinline int hwpopcnt(const uint64_t i)
+{
+	int64_t n;
+	asm("popcnt %1,%0" : "=r"(n) : "rm"(i) : "cc");
+	return n;
+}
+
+#ifndef W32_BUILD
+
 forceinline int popcnt(uint64_t x)
 {
 	x = x - ((x >> 1) & 0x5555555555555555);
@@ -2444,46 +2441,7 @@ forceinline int popcnt(uint64_t x)
 	return (x * 0x0101010101010101) >> 56;
 }
 
-forceinline int hwpopcnt(const uint64_t i)
-{
-	int64_t n;
-	asm("popcnt %1,%0" : "=r"(n) : "rm"(i) : "cc");
-	return n;
-}
-
-template <bool HPopCnt> forceinline int popcount(uint64_t x)
-{
-	return HPopCnt ? hwpopcnt(x) : popcnt(x);
-}
 #else
-
-forceinline int lsb(uint64_t x)
-{
-	_asm{
-		mov eax, dword ptr x[0]
-		test eax, eax
-		jz l_high
-		bsf eax, eax
-		jmp l_ret
-		l_high : bsf eax, dword ptr x[4]
-		add eax, 20h
-		l_ret :
-	}
-}
-
-forceinline int msb(uint64_t x)
-{
-	_asm{
-		mov eax, dword ptr x[4]
-		test eax, eax
-		jz l_low
-		bsr eax, eax
-		add eax, 20h
-		jmp l_ret
-		l_low : bsr eax, dword ptr x[0]
-		l_ret :
-	}
-}
 
 forceinline int popcnt(uint64_t x)
 {
@@ -2499,11 +2457,12 @@ forceinline int popcnt(uint64_t x)
 	return ((x1 * 0x01010101) >> 24) + ((x2 * 0x01010101) >> 24);
 }
 
+#endif
+
 template <bool HPopCnt> forceinline int popcount(uint64_t x)
 {
-	return HPopCnt ? (__popcnt((int) x) + __popcnt(x >> 32)) : popcnt(x);
+	return HPopCnt ? hwpopcnt(x) : popcnt(x);
 }
-#endif
 
 forceinline int MinF(int x, int y)
 {
